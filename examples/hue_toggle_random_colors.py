@@ -1,5 +1,6 @@
 from tkinter import *
 from phue import Bridge
+from datetime import datetime, timedelta
 import random
 
 
@@ -27,6 +28,10 @@ if not b.get_light(3, 'on'):
     b.set_light(3, 'on', True)
     b.set_light(3, 'bri', 150)
 
+
+current_time = datetime.now()
+
+
 for light in b.lights:
     light_id = light.light_id
     light.xy = [random.random(),random.random()]
@@ -43,15 +48,20 @@ for light in b.lights:
     button_command = lambda button_var=button_var, light_id=light_id: b.set_light(light_id, 'on', button_var.get())
     button = Checkbutton(channel_frame, variable = button_var, command = button_command)
     button.pack()
-
     
     button_random_command = lambda  light = light: set_light_xy(light)
     button_random = Button(channel_frame, command = button_random_command)
     button_random.pack()
     
-
     label = Label(channel_frame)
     label.config(text = b.get_light(light_id,'name'))
     label.pack()
+
+    data = {'on': False, 'transitiontime' : 300}
+    bed_time = current_time + timedelta(seconds=30)
+    bed_time = current_time.strftime('%Y-%m-%dT%H:%M:%S')
+    b.create_schedule('Bed schedule' + str(light_id), bed_time, light_id, data, 'Bedtime')
+
+
 
 root.mainloop()
